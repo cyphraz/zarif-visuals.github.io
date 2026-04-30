@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zarif's Visuals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #181818;
+      --accent: #e8c97e;
+      --accent2: #c9a85c;
+      --text: #f0ece4;
+      --muted: #888880;
+      --border: #222220;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CUSTOM CURSOR */
+    .cursor {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease;
+    }
+    .cursor-ring {
+      width: 32px; height: 32px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.5;
+      transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+    }
+    body:hover .cursor { opacity: 1; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.5rem 4rem;
+      background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 4rem 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 40%, rgba(232,201,126,0.06) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(232,201,126,0.04) 0%, transparent 50%);
+    }
+    .hero-grain {
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .hero-line {
+      width: 1px; height: 120px;
+      background: linear-gradient(to bottom, transparent, var(--accent));
+      margin-bottom: 2rem;
+      animation: lineGrow 1.5s ease forwards;
+      transform-origin: top;
+    }
+    @keyframes lineGrow { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+
+    .hero-tag {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.3s forwards;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      line-height: 0.95;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.5s forwards;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero-sub {
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 380px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.7s forwards;
+    }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 0.85rem 1.75rem;
+      transition: border-color 0.3s, color 0.3s;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.9s forwards;
+    }
+    .hero-cta:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-cta svg { transition: transform 0.3s; }
+    .hero-cta:hover svg { transform: translateX(4px); }
+
+    .hero-scroll {
+      position: absolute; right: 4rem; bottom: 6rem;
+      writing-mode: vertical-rl;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex; align-items: center; gap: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 1.1s forwards;
+    }
+    .hero-scroll::after {
+      content: '';
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SECTION BASE */
+    section { padding: 7rem 4rem; }
+    .section-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-label::before {
+      content: '';
+      width: 2rem; height: 1px;
+      background: var(--accent);
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 3rem;
+    }
+
+    /* VIDEO SECTION */
+    #videos { background: var(--bg); }
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+    .video-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+      position: relative;
+    }
+    .video-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .video-thumb {
+      width: 100%; aspect-ratio: 16/9;
+      background: var(--bg2);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .video-thumb iframe {
+      width: 100%; height: 100%;
+      border: none;
+      position: absolute; inset: 0;
+    }
+    .video-placeholder {
+      width: 100%; aspect-ratio: 16/9;
+      background: linear-gradient(135deg, var(--bg2), var(--bg3));
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.75rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.3s;
+      position: relative;
+    }
+    .video-placeholder:hover { background: linear-gradient(135deg, var(--bg3), #1e1e1e); }
+    .play-btn {
+      width: 52px; height: 52px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      transition: background 0.3s, transform 0.3s;
+    }
+    .video-placeholder:hover .play-btn {
+      background: var(--accent);
+      color: var(--bg);
+      transform: scale(1.1);
+    }
+    .video-info { padding: 1.25rem 1.5rem; }
+    .video-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+    .video-meta { font-size: 0.75rem; color: var(--muted); }
+    .video-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    /* ADD VIDEO BUTTON */
+    .add-video-card {
+      border: 1px dashed var(--border);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.75rem;
+      aspect-ratio: unset;
+      min-height: 220px;
+      cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .add-video-card:hover { border-color: var(--accent); background: var(--bg3); color: var(--accent); }
+    .add-icon {
+      width: 40px; height: 40px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 300;
+    }
+
+    /* ART SECTION */
+    #art { background: var(--bg2); }
+    .art-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: 200px;
+      gap: 1rem;
+    }
+    .art-item {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .art-item:hover { border-color: var(--accent); }
+    .art-item:nth-child(1) { grid-column: span 5; grid-row: span 2; }
+    .art-item:nth-child(2) { grid-column: span 4; grid-row: span 1; }
+    .art-item:nth-child(3) { grid-column: span 3; grid-row: span 1; }
+    .art-item:nth-child(4) { grid-column: span 7; grid-row: span 1; }
+    .art-item:nth-child(5) { grid-column: span 4; grid-row: span 2; }
+    .art-item:nth-child(6) { grid-column: span 3; grid-row: span 1; }
+    .art-placeholder {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    }
+    .art-placeholder svg { opacity: 0.4; }
+    .art-overlay {
+      position: absolute; inset: 0;
+      background: rgba(10,10,10,0.85);
+      display: flex; align-items: flex-end;
+      padding: 1.25rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .art-item:hover .art-overlay { opacity: 1; }
+    .art-overlay-text { font-size: 0.8rem; color: var(--text); }
+
+    /* ABOUT */
+    #about { background: var(--bg); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+    .about-text p {
+      font-size: 1rem;
+      line-height: 1.85;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .about-text p strong { color: var(--text); font-weight: 500; }
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .stat-item { border-top: 1px solid var(--border); padding-top: 1.25rem; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; }
+    .skills-list { display: flex; flex-direction: column; gap: 1rem; }
+    .skill-item {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-bar {
+      width: 120px; height: 1px;
+      background: var(--border);
+      position: relative;
+    }
+    .skill-fill {
+      position: absolute; top: 0; left: 0; height: 100%;
+      background: var(--accent);
+    }
+
+    /* CONTACT */
+    #contact { background: var(--bg2); }
+    .contact-inner {
+      max-width: 600px;
+    }
+    .contact-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 3rem;
+    }
+    .contact-links { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-link {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.85rem;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .contact-link:hover { border-color: var(--accent); background: var(--bg3); }
+    .contact-link span { color: var(--muted); font-size: 0.75rem; }
+
+    /* FOOTER */
+    footer {
+      padding: 2rem 4rem;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+    .footer-copy { font-size: 0.72rem; color: var(--muted); }
+
+    /* MODAL */
+    .modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .modal.open { display: flex; }
+    .modal-inner { width: 100%; max-width: 800px; position: relative; }
+    .modal-close {
+      position: absolute; top: -2.5rem; right: 0;
+      background: none; border: none;
+      color: var(--muted); font-size: 0.8rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: none;
+      transition: color 0.3s;
+    }
+    .modal-close:hover { color: var(--accent); }
+
+    /* INSTRUCTIONS BANNER */
+    .instructions {
+      background: rgba(232,201,126,0.08);
+      border: 1px solid rgba(232,201,126,0.2);
+      padding: 1.25rem 4rem;
+      font-size: 0.78rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      line-height: 1.6;
+    }
+    .instructions strong { font-weight: 500; }
+
+    @media (max-width: 768px) {
+      nav, section, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .hero { padding: 0 1.5rem 4rem; }
+      .hero-scroll { display: none; }
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .art-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 160px; }
+      .art-item { grid-column: span 1 !important; grid-row: span 1 !important; }
+      .video-grid { grid-template-columns: 1fr; }
+      .instructions { padding: 1rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- INSTRUCTIONS -->
+  <div class="instructions">
+    <strong>How to customize this site:</strong> Replace video placeholder cards with your actual YouTube/Drive links. Upload your art images and replace the placeholder boxes. Update your name, bio, and contact details. Host for free on GitHub Pages.
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Zarif's Visuals</a>
+    <ul class="nav-links">
+      <li><a href="#videos">Videos</a></li>
+      <li><a href="#art">Art</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-bg"></div>
+    <div class="hero-grain"></div>
+    <div class="hero-line"></div>
+    <p class="hero-tag">Dubai — Videographer & Visual Artist</p>
+    <h1 class="hero-title">Zarif's<br /><em>Visuals</em></h1>
+    <p class="hero-sub">Crafting cinematic stories through the lens. Short-form content, brand videos, and digital art rooted in aesthetic intentionality.</p>
+    <a href="#videos" class="hero-cta">
+      View Work
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <div class="hero-scroll">Scroll</div>
+  </section>
+
+  <!-- VIDEOS -->
+  <section id="videos">
+    <p class="section-label">Work</p>
+    <h2 class="section-title">Video & Editing</h2>
+    <div class="video-grid">
+
+      <!-- REPLACE THESE WITH YOUR ACTUAL VIDEOS -->
+      <!-- To embed a YouTube video, replace the src with: https://www.youtube.com/embed/YOUR_VIDEO_ID -->
+      <!-- To embed a Google Drive video, use: https://drive.google.com/file/d/YOUR_FILE_ID/preview -->
+
+      <div class="video-card">
+        <div class="video-placeholder" onclick="openModal('https://www.youtube.com/embed/YOUR_VIDEO_ID_1')">
+          <div class="play-btn">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M6 4l9 5-9 5V4z"/></svg>
+          </div>
+          <span>Add Your Video</span>
+        </div>
+        <div class="video-info">
+          <div class="video-title">Video Title Here</div>
+          <div class="video-meta">2025 · Dubai</div>
+          <div class="video-tag">Reel</div>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-placeholder" onclick="openModal('https://www.youtube.com/embed/YOUR_VIDEO_ID_2')">
+          <div class="play-btn">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M6 4l9 5-9 5V4z"/></svg>
+          </div>
+          <span>Add Your Video</span>
+        </div>
+        <div class="video-info">
+          <div class="video-title">Video Title Here</div>
+          <div class="video-meta">2025 · Dubai</div>
+          <div class="video-tag">Brand Promo</div>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-placeholder" onclick="openModal('https://www.youtube.com/embed/YOUR_VIDEO_ID_3')">
+          <div class="play-btn">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M6 4l9 5-9 5V4z"/></svg>
+          </div>
+          <span>Add Your Video</span>
+        </div>
+        <div class="video-info">
+          <div class="video-title">Video Title Here</div>
+          <div class="video-meta">2024 · Dubai</div>
+          <div class="video-tag">Cinematic</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ART -->
+  <section id="art">
+    <p class="section-label">Creative</p>
+    <h2 class="section-title">Digital Art</h2>
+    <div class="art-grid">
+      <!-- REPLACE THESE: change the art-placeholder divs with <img> tags pointing to your art files -->
+      <!-- Example: <img src="your-art-1.jpg" style="width:100%;height:100%;object-fit:cover;" /> -->
+      <div class="art-item">
+        <div class="art-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Your Art Here</span>
+        </div>
+        <div class="art-overlay"><div class="art-overlay-text">Artwork Title</div></div>
+      </div>
+      <div class="art-item">
+        <div class="art-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Your Art Here</span>
+        </div>
+        <div class="art-overlay"><div class="art-overlay-text">Artwork Title</div></div>
+      </div>
+      <div class="art-item">
+        <div class="art-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Your Art Here</span>
+        </div>
+        <div class="art-overlay"><div class="art-overlay-text">Artwork Title</div></div>
+      </div>
+      <div class="art-item">
+        <div class="art-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Your Art Here</span>
+        </div>
+        <div class="art-overlay"><div class="art-overlay-text">Artwork Title</div></div>
+      </div>
+      <div class="art-item">
+        <div class="art-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Your Art Here</span>
+        </div>
+        <div class="art-overlay"><div class="art-overlay-text">Artwork Title</div></div>
+      </div>
+      <div class="art-item">
+        <div class="art-placeholder">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Your Art Here</span>
+        </div>
+        <div class="art-overlay"><div class="art-overlay-text">Artwork Title</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-label">About</p>
+    <h2 class="section-title">The Person<br />Behind the Lens</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>I'm <strong>Zarif</strong>, a Dubai-based videographer, video editor, and digital artist. I create short-form content, brand videos, and cinematic reels — blending technical precision with a strong aesthetic eye.</p>
+        <p>Alongside my creative work, I'm completing a <strong>BSc in Information Technology</strong> at Middlesex University Dubai, which gives me an edge in understanding digital platforms, content tools, and fast-turnaround workflows.</p>
+        <p>I shoot on mobile and edit in CapCut, producing content that punches above its weight. Every frame is intentional. Every cut is deliberate.</p>
+        <div class="about-stats">
+          <div class="stat-item">
+            <div class="stat-num">3+</div>
+            <div class="stat-label">Years creating</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">AE</div>
+            <div class="stat-label">Based in Dubai</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">∞</div>
+            <div class="stat-label">Stories to tell</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">0→1</div>
+            <div class="stat-label">Always building</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="skills-list">
+          <div class="skill-item">
+            Video Editing (CapCut)
+            <div class="skill-bar"><div class="skill-fill" style="width:88%"></div></div>
+          </div>
+          <div class="skill-item">
+            Mobile Videography
+            <div class="skill-bar"><div class="skill-fill" style="width:82%"></div></div>
+          </div>
+          <div class="skill-item">
+            Digital Art & Illustration
+            <div class="skill-bar"><div class="skill-fill" style="width:78%"></div></div>
+          </div>
+          <div class="skill-item">
+            Photography
+            <div class="skill-bar"><div class="skill-fill" style="width:74%"></div></div>
+          </div>
+          <div class="skill-item">
+            Content Strategy
+            <div class="skill-bar"><div class="skill-fill" style="width:65%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label">Contact</p>
+    <h2 class="section-title">Let's Work<br />Together</h2>
+    <div class="contact-inner">
+      <p class="contact-desc">Available for video editing, brand content, reels, and creative collaborations in Dubai and remotely. Fast turnaround. Serious about quality.</p>
+      <div class="contact-links">
+        <a href="mailto:your.email@email.com" class="contact-link">
+          your.email@email.com
+          <span>Email →</span>
+        </a>
+        <a href="https://wa.me/971XXXXXXXXX" class="contact-link" target="_blank">
+          WhatsApp / Phone
+          <span>+971 XX XXX XXXX →</span>
+        </a>
+        <a href="#" class="contact-link" target="_blank">
+          Instagram
+          <span>@yourhandle →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Zarif's Visuals</div>
+    <div class="footer-copy">© 2025 Zarif. All rights reserved.</div>
+  </footer>
+
+  <!-- VIDEO MODAL -->
+  <div class="modal" id="videoModal">
+    <div class="modal-inner">
+      <button class="modal-close" onclick="closeModal()">✕ Close</button>
+      <div style="position:relative;padding-bottom:56.25%;background:#000;">
+        <iframe id="modalIframe" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    function animateCursor() {
+      cursor.style.transform = `translate(${mx - 4}px, ${my - 4}px)`;
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.transform = `translate(${rx - 16}px, ${ry - 16}px)`;
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Modal
+    function openModal(src) {
+      document.getElementById('modalIframe').src = src + '?autoplay=1';
+      document.getElementById('videoModal').classList.add('open');
+    }
+    function closeModal() {
+      document.getElementById('modalIframe').src = '';
+      document.getElementById('videoModal').classList.remove('open');
+    }
+    document.getElementById('videoModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.video-card, .art-item, .stat-item, .skill-item, .contact-link').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(24px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease, border-color 0.3s, background 0.3s';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
